@@ -1,59 +1,59 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
+#define ll  long long
+#define mxN 100007
+#define left st, (st+en)/2, nd + nd
+#define right (st+en)/2+1,en,nd+nd+1
 using namespace std;
-#define MAX 100005
-#define left st, (st + en) / 2, nd + nd
-#define right (st + en) / 2 + 1, en, nd + nd + 1
-#define ll long long
-
-ll tree[4 * MAX + 5];
-ll lazy[4 * MAX + 5];
-
-void update(int st, int en, int nd, int L, int R, int v)
+int a[mxN];
+struct info
 {
-    if(lazy[nd] != 0) /// not query specific
+    int sum;
+    int prop;
+} tree[4 * mxN];
+void build(int st,int en,int nd)
+{
+    if(st == en)
     {
-        tree[nd] += (en - st + 1) * lazy[nd];
-        if(st != en)
-        {
-            lazy[nd + nd] += lazy[nd];
-            lazy[nd + nd + 1] += lazy[nd];
-        }
-        lazy[nd] = 0;
-    }
-    if(en < L || R < st) return;
-    if(L <= st && en <= R) /// query specific
-    {
-        tree[nd] += (en - st + 1) * v;
-        if(st != en)
-        {
-            lazy[nd + nd] += v;
-            lazy[nd + nd + 1] += v;
-        }
+        tree[nd].sum = a[st];
+        tree[nd].prop = 0;
         return;
     }
-    update(left, L, R, v);
-    update(right, L, R, v);
-    tree[nd] = tree[nd + nd] + tree[nd + nd + 1];
+    build(left);
+    build(right);
+    tree[nd].sum = tree[nd+nd].sum + tree[nd+nd+1].sum;
 }
-
-ll query(int st, int en, int nd, int L, int R)
+void update(int st,int en,int nd,int L, int R,int x)
 {
-    if(en < L || R < st) return 0;
-    if(lazy[nd] != 0) /// not query specific
+    if(L > en || R < st)
     {
-        tree[nd] += (en - st + 1) * lazy[nd];
-        if(st != en)
-        {
-            lazy[nd + nd] += lazy[nd];
-            lazy[nd + nd + 1] += lazy[nd];
-        }
-        lazy[nd] = 0;
+        return;
     }
-    if(L <= st && en <= R) return tree[nd]; /// if the query segment is completely overlapping our tree segment/node.
-    return query(left, L, R) + query(right, L, R);
+    if(st >= L and en <= R)
+    {
+        tree[nd].sum += ((en-st+1)*x);
+        tree[nd].prop += x;
+        return;
+    }
+    update(left,L,R,x);
+    update(right,L,R,x);
+    tree[nd].sum = tree[nd+nd].sum + tree[nd+nd+1].sum + (en - st) * tree[nd].prop;
+}
+ll query(int st, int en, int nd, int L, int R, int carry = 0)
+{
+    if(L > en || R < st)
+    {
+        return 0;
+    }
+    if(st >= L and en <= R)
+    {
+        return tree[nd].sum + carry * (en - st + 1);
+    }
+    return query(left,L,R,carry + tree[nd].prop) + query(right, L, R, carry + tree[nd].prop);
+
 }
 int main()
 {
-    printf("SegmentTreeLazy\n");
+    printf("SEGMENTTREELAZY\n");
+
     return 0;
 }
